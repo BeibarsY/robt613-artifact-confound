@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.pytest_cache/
+results/cache/
+.DS_Store
+slide_pdf.zip
+__MACOSX/
+slide_pdf/report/refs/*.pdf

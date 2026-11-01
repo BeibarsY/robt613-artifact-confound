@@ -1,0 +1,2 @@
+analysis,session,classifier,test,W,p,delta_median,delta_iqr_lo,delta_iqr_hi,delta_n,n_above_own_p95,supported
+primary,0train,logreg,wilcoxon AUC-0.5 > 0,45.0,0.001953125,0.3587962962962963,0.26967592592592593,0.46643518518518523,9,8,True

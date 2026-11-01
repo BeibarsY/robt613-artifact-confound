@@ -1,0 +1,122 @@
+% 12-minute talk. Compile on Overleaf (beamer). Numbers from ../report/numbers.tex.
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\usepackage{graphicx,booktabs}
+\graphicspath{{../report/figures/}}
+\input{../report/numbers.tex}
+\title{Do eye movements drive motor-imagery decoding on BCI~IV~2a?}
+\author{Chidiadi Bethel Mba \and Sungkar Bolat \and Beibars Ybraiakhyn \and Ramazan Zypayev}
+\institute{ROBT613 midterm}
+\date{}
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}{Question and pre-registered hypotheses}
+\begin{itemize}
+\item The 2a cue is an arrow pointing toward the task (left, right, down, up)
+\item H1 \quad EOG alone decodes left vs right above chance in most subjects
+\item H2 \quad Removing ocular activity lowers EEG decoding, more where H1 is strong
+\item H3 \quad Cleaning moves weight from frontal / artifact bands to central mu and beta
+\item Decision rules fixed before running FULL (Wilcoxon, own permutation null, $n=9$)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Stage 1 \quad Data audit}
+\begin{columns}
+\column{0.5\textwidth}
+\begin{itemize}\small
+\item \NRecordings{} recordings, \NTrialsSession{} trials each, 22 EEG + 3 EOG, 250 Hz
+\item Annotation = cue onset (checked for every trial)
+\item Recovered from the source files: expert artifact flags (\ExpertMin{}--\ExpertMax{} per session) and EOG calibration runs
+\end{itemize}
+\column{0.5\textwidth}
+\includegraphics[width=\linewidth]{fig_1a_raw_segment.png}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Stage 2 \quad Signal inspection and filtering}
+\includegraphics[width=\linewidth]{fig_2a_psd_before_after.png}
+\small 1--45 Hz FIR. Default design gives only \GainFiftyDefault{} dB at 50 Hz, ours \GainFifty{} dB, so no notch needed.
+\end{frame}
+
+\begin{frame}{Stage 3 \quad Artifact handling}
+\begin{columns}
+\column{0.55\textwidth}
+\includegraphics[width=\linewidth]{fig_3b_eog_regression_before_after.png}
+\column{0.45\textwidth}
+\begin{itemize}\small
+\item none = filter + CAR, eog\_reg, ica (20 comps, $|r|\ge0.5$)
+\item Both fitted on calibration runs, never on MI trials
+\item Fz--EOG2 $|r|$ \FzEogRNone{} $\to$ \FzEogRReg{} / \FzEogRIca{}
+\item No rejection (max \PtpMax{} $\mu$V), same epochs in all conditions
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Stage 4 \quad The confound exists before any classifier}
+\includegraphics[width=\linewidth]{fig_4c_eog_evoked_by_class.png}
+\small Gaze follows the arrow in \HeogPos{}/\NRecordings{} recordings, onset \HeogOnsetMin{}--\HeogOnsetMax{} ms after the cue
+\end{frame}
+
+\begin{frame}{Stage 5--6 \quad Features, classifiers, honest evaluation}
+\begin{columns}
+\column{0.4\textwidth}
+\begin{itemize}\small
+\item Log band power (MI window) and amplitude bins
+\item 4 feature sets $\times$ 3 cleanings $\times$ logreg / sLDA
+\item Leave-one-run-out CV, within-run permutation null for every row
+\item Leakage test in the test suite
+\end{itemize}
+\column{0.6\textwidth}
+\includegraphics[width=\linewidth]{fig_6a_auc_per_subject_by_condition.png}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Stage 7 \quad H1 \HoneVerdict{}}
+\begin{columns}
+\column{0.55\textwidth}
+\includegraphics[width=\linewidth]{fig_7a_eog_only_auc_vs_null.png}
+\column{0.45\textwidth}
+\begin{itemize}\small
+\item EOG-only median AUC \AucEogNoneT{} (0train), \AucEogNoneE{} (1test)
+\item \HoneAbove{}/\HoneN{} above own null, Wilcoxon $p=\HoneP{}$
+\item Holds in \RobHoneAll{} \RobHoneN{} robustness analyses
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Stage 7 \quad H2 and H3 \HtwoVerdict{}}
+\begin{columns}
+\column{0.5\textwidth}
+\includegraphics[width=\linewidth]{fig_7b_auc_drop_vs_eog_auc.png}
+\column{0.5\textwidth}
+\includegraphics[width=\linewidth]{fig_7d_delta_auc_by_feature_set.png}
+\end{columns}
+\small eeg\_all AUC \AucAllNoneT{} $\to$ \AucAllRegT{} / \AucAllIcaT{}, $p=\HtwoPReg{}$ / \HtwoPIca{}. Artifact-prone set does not lose more ($p=\HthreeP{}$).
+\end{frame}
+
+\begin{frame}{Exploratory \quad where the risk lies}
+\begin{columns}
+\column{0.5\textwidth}
+\includegraphics[width=\linewidth]{fig_7e_exploratory_frontal_amplitude.png}
+\column{0.5\textwidth}
+\begin{itemize}\small
+\item Not pre-registered
+\item Frontal EEG time-domain features, AUC \ExAucNone{} $\to$ \ExAucReg{} / \ExAucIca{}
+\item The confound is a time-domain event, band power in the MI window does not pick it up
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Limits and take-home}
+\begin{itemize}
+\item Offline, $n=9$, low power for small cleaning effects
+\item Regression and ICA target eyes, not EMG (tongue)
+\item Cleaning is partial at frontal sites
+\item Gaze shift is a reflex to the cue, not cheating
+\item Take-home \quad report an EOG-only baseline next to any 2a score that uses EOG, frontal time-domain features or cue-overlapping windows
+\end{itemize}
+\end{frame}
+\end{document}

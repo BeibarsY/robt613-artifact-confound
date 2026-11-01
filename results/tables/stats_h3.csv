@@ -1,0 +1,5 @@
+analysis,session,test,W,p,delta_median,delta_iqr_lo,delta_iqr_hi,delta_n,median_drop_physio,median_drop_artifact_prone,median_share_none,median_share_ica,H3_supported
+primary,0train,"wilcoxon drop(artifact_prone) > drop(physio), none->ica",17.0,0.751953125,-0.043981481481481455,-0.09953703703703687,-0.019675925925925764,9,-0.01041666666666674,-0.056712962962962965,,,False
+primary,0train,wilcoxon weight share central: ica > none,33.0,0.125,0.017874874963733384,-0.01250914507939821,0.024873039854244994,9,,,0.24790616537435015,0.2763670046310109,False
+primary,0train,wilcoxon weight share mubeta: ica > none,25.0,0.41015625,0.01039085326502448,-0.038297302709277725,0.02550608498939122,9,,,0.45806596479185574,0.45792392764718626,False
+primary,0train,wilcoxon weight share central_mubeta: ica > none,28.0,0.28515625,0.009219567601281856,-0.010507011075346295,0.024183420871294575,9,,,0.10181019383156226,0.1116390700194379,False

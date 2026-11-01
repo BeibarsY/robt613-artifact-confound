@@ -1,0 +1,2 @@
+n_taps,length_s,l_freq,h_freq,h_trans_bandwidth,gain_dB_0.5Hz,gain_dB_1Hz,gain_dB_45Hz,gain_dB_47.5Hz,gain_dB_50Hz,gain_dB_50Hz_mne_default
+825,3.3,1.0,45.0,5.0,-5.965395764477895,-0.029664863252642733,-0.02457848746492412,-6.023636355451767,-51.241796782772084,-4.499492645468744

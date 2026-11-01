@@ -1,0 +1,11 @@
+# Pinned from the local dev venv (Python 3.13, macOS) on 2026-10-27.
+# TODO: re-pin on a fresh Colab CPU runtime (Phase 8) and keep whichever set runs there.
+mne==1.13.2
+moabb==1.7.2
+scikit-learn==1.9.1
+numpy==2.5.4
+scipy==1.18.1
+pandas==3.1.0
+matplotlib==3.11.2
+nbformat==5.11.1
+pytest==9.1.1
