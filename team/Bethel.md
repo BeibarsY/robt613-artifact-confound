@@ -44,7 +44,7 @@ MOABB при загрузке выбрасывает две полезные в�
 ## 3. Твои задачи (по шагам)
 
 ### Задача 1. Получить проект и запустить его у себя
-1. Beibars даст ссылку на репозиторий GitHub. Скачай его (`git clone <ссылка>`).
+1. Скачай репозиторий: `git clone https://github.com/BeibarsY/robt613-artifact-confound.git`
 2. В папке проекта установи окружение (один раз):
    ```bash
    python3 -m venv .venv && .venv/bin/pip install -r requirements.txt

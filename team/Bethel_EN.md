@@ -75,7 +75,7 @@ When loading, MOABB throws away two useful things. We read them directly from th
 ## 3. Your tasks (step by step)
 
 ### Task 1. Get the project and run it on your computer
-1. Beibars will send the GitHub repository link. Download it (`git clone <link>`).
+1. Download the repository: `git clone https://github.com/BeibarsY/robt613-artifact-confound.git`
 2. In the project folder, set up the environment (once):
    ```bash
    python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
