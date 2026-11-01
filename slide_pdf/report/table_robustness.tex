@@ -1,0 +1,21 @@
+\begin{table}[t]
+\caption{Robustness of H1 and H2. One-sided Wilcoxon p-values across the 9 subjects. Generated from results/tables/stats\_h1.csv, stats\_h2.csv and stats\_robustness.csv.}
+\label{tab:robust}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & \multicolumn{2}{c}{H1 (EOG only)} & \multicolumn{2}{c}{H2 (eeg\_all drop)}\\
+\cmidrule(lr){2-3}\cmidrule(l){4-5}
+Analysis & $p$ & above null & reg & ICA\\
+\midrule
+Primary, 0train, logreg & 0.002 & 8/9 & 0.633 & 0.633 \\
+0train, shrinkage LDA & 0.002 & 8/9 & 0.590 & 0.545 \\
+1test, logreg & 0.002 & 9/9 & 0.131 & 0.705 \\
+1test, shrinkage LDA & 0.002 & 9/9 & 0.312 & 0.902 \\
+Expert-flagged excluded & 0.002 & 8/9 & 0.326 & 0.410 \\
+Cross-session & 0.002 & 9/9 & 0.180 & 0.367 \\
+\bottomrule
+\end{tabular}
+\end{table}

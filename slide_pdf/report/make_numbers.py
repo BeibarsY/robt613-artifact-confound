@@ -142,6 +142,83 @@ if ex_p.exists():
     put("ExAucNone", ex.median_auc_none.iloc[0])
     put("ExAboveNone", int(ex.n_above_p95_none.iloc[0]), "{:d}")
 
+# ---- extra numbers for the extended report
+put("XsPhysioNone", xs.query("feature_set == 'eeg_physio' and cleaning == 'none'").auc.median())
+put("XsPhysioIca", xs.query("feature_set == 'eeg_physio' and cleaning == 'ica'").auc.median())
+put("XsProneNone", xs.query("feature_set == 'eeg_artifact_prone' and cleaning == 'none'").auc.median())
+put("XsAboveEog", int((xs.query("feature_set == 'eog_only'").auc > xs.query("feature_set == 'eog_only'").auc_chance_p95).sum()), "{:d}")
+sec = pd.read_csv(T / "stats_secondary_4class.csv").query("session == '0train'").set_index(["feature_set", "cleaning"])
+put("AucOvrAllNone", sec.loc[("eeg_all", "none"), "auc_ovr_median"])
+put("AucOvrEogNone", sec.loc[("eog_only", "none"), "auc_ovr_median"])
+put("FourAboveEog", int(sec.loc[("eog_only", "none"), "n_above_p95"]), "{:d}")
+put("FourAboveProne", int(sec.loc[("eeg_artifact_prone", "none"), "n_above_p95"]), "{:d}")
+eo = lr.query("session == '0train' and feature_set == 'eog_only'").set_index("subject").auc_mean
+put("EogBestSubj", f"S{eo.idxmax()}"); put("EogBestAuc", eo.max())
+put("EogWorstSubj", f"S{eo.idxmin()}"); put("EogWorstAuc", eo.min())
+put("ChanceMin", lr.query("session == '0train'").chance_p95.min()); put("ChanceMax", lr.query("session == '0train'").chance_p95.max())
+put("NIcaComponents", int(cf.n_ica_components.max()), "{:d}")
+
+# ---- generated tables
+def cell(v, thr):
+    s = f"{v:.2f}"
+    return f"\\textbf{{{s}}}" if v > thr else s
+
+cols = [("eog_only", "none")] + [(f, c) for f in ("eeg_all", "eeg_physio", "eeg_artifact_prone") for c in ("none", "eog_reg", "ica")]
+d0 = lr.query("session == '0train'").set_index(["subject", "feature_set", "cleaning"])
+rows = []
+for sub in sorted(lr.subject.unique()):
+    vals = [cell(d0.loc[(sub, f, c), "auc_mean"], d0.loc[(sub, f, c), "chance_p95"]) for f, c in cols]
+    rows.append(f"S{sub} & " + " & ".join(vals) + r" \\")
+med = [f"{lr.query('session == \'0train\' and feature_set == @f and cleaning == @c').auc_mean.median():.2f}" for f, c in cols]
+tab = r"""\begin{table*}[t]
+\caption{Left versus right AUC per subject, session 0train, logistic regression, leave-one-run-out. Bold marks an AUC above the 95th percentile of that subject's own permutation null. Generated from results/tables/auc\_per\_subject.csv.}
+\label{tab:persubject}
+\centering
+\small
+\begin{tabular}{@{}l c ccc ccc ccc@{}}
+\toprule
+ & EOG only & \multicolumn{3}{c}{eeg\_all} & \multicolumn{3}{c}{eeg\_physio} & \multicolumn{3}{c}{eeg\_artifact\_prone}\\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(l){9-11}
+Subject & none & none & reg & ICA & none & reg & ICA & none & reg & ICA\\
+\midrule
+""" + "\n".join(rows) + "\n\\midrule\nMedian & " + " & ".join(med) + r""" \\
+\bottomrule
+\end{tabular}
+\end{table*}
+"""
+(Path(__file__).resolve().parent / "table_persubject.tex").write_text(tab)
+
+def pf(x):
+    return "--" if pd.isna(x) else (f"{x:.3f}" if x >= 0.001 else f"{x:.1e}")
+h1p = pd.read_csv(T / "stats_h1.csv").iloc[0]; h2p = pd.read_csv(T / "stats_h2.csv")
+lines = [("Primary, 0train, logreg", h1p.p, int(h1p.n_above_own_p95), h2p.p[0], h2p.p[1])]
+names = {"0train/slda": "0train, shrinkage LDA", "1test/logreg": "1test, logreg", "1test/slda": "1test, shrinkage LDA",
+         "expert artifacts excluded": "Expert-flagged excluded", "cross-session 0train->1test": "Cross-session"}
+for a, label in names.items():
+    g = rob.query("analysis == @a")
+    h1r = g.query("hypothesis == 'H1'").iloc[0]
+    h2r = g.query("hypothesis == 'H2'").set_index("comparison")
+    lines.append((label, h1r.p, int(h1r.n_above_own_p95), h2r.loc["none vs eog_reg", "p"], h2r.loc["none vs ica", "p"]))
+body = "\n".join(f"{l} & {pf(a)} & {n}/9 & {pf(b)} & {pf(c)}" + r" \\" for l, a, n, b, c in lines)
+tab2 = r"""\begin{table}[t]
+\caption{Robustness of H1 and H2. One-sided Wilcoxon p-values across the 9 subjects. Generated from results/tables/stats\_h1.csv, stats\_h2.csv and stats\_robustness.csv.}
+\label{tab:robust}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & \multicolumn{2}{c}{H1 (EOG only)} & \multicolumn{2}{c}{H2 (eeg\_all drop)}\\
+\cmidrule(lr){2-3}\cmidrule(l){4-5}
+Analysis & $p$ & above null & reg & ICA\\
+\midrule
+""" + body + r"""
+\bottomrule
+\end{tabular}
+\end{table}
+"""
+(Path(__file__).resolve().parent / "table_robustness.tex").write_text(tab2)
+
 # ---- compute budget
 tm = pd.read_csv(ROOT / "results" / "timing.csv").query("mode == 'FULL'").groupby("stage").seconds.last()
 put("TimeDecode", tm.get("05_decode_all_conditions", np.nan) / 60, "{:.1f}")
